@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Food Health Scanner</title>
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+            font-family: 'Inter', sans-serif;
+        }
+        .scanner-box {
+            border: 2px dashed #5D5CDE;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        .product-card {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .rating-bar {
+            background: linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #ef4444 100%);
+        }
+        .button-primary {
+            background: #5D5CDE;
+            transition: all 0.3s ease;
+        }
+        .button-primary:hover {
+            background: #4b4ac8;
+            transform: translateY(-1px);
+        }
+        .category-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        accent: '#22c55e',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        background: '#f5f7fa',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen text-gray-800">
+    <div class="container mx-auto px-4 py-6 max-w-4xl">
+        <header class="flex items-center justify-between mb-8">
+            <h1 class="text-3xl font-bold text-primary">Indian Food Health Scanner</h1>
+            <button id="theme-toggle" class="p-2 rounded-full bg-gray-200">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
+                </svg>
+            </button>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Side: Scanner -->
+            <div class="scanner-box p-6 rounded-xl">
+                <h2 class="text-xl font-semibold mb-4 text-primary">Scan Barcode</h2>
+                <div id="scanner-container" class="mb-4">
+                    <div id="interactive" class="viewport rounded-lg overflow-hidden"></div>
+                    <div class="flex gap-3 mt-4">
+                        <button id="start-button" class="button-primary text-white px-4 py-2 rounded-lg">Start Scanner</button>
+                        <button id="stop-button" class="bg-gray-500 text-white px-4 py-2 rounded-lg hidden">Stop Scanner</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <h3 class="font-medium mb-2">Search Products:</h3>
+                    <input id="product-search" type="text" placeholder="Search for a product..." class="w-full p-2 border rounded-lg mb-4">
+
+                    <h3 class="font-medium mb-2">Filters:</h3>
+                    <div class="flex gap-2 mb-4">
+                        <button class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Diabetic-safe</button>
+                        <button class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Low-carb</button>
+                    </div>
+
+                    <h3 class="font-medium mb-2">Categories:</h3>
+                    <div class="category-filter mb-4">
+                        <button class="category-btn px-3 py-1 bg-gray-200 rounded-full text-sm" data-category="all">All</button>
+                        <button class="category-btn px-3 py-1 bg-gray-200 rounded-full text-sm" data-category="Staples">Staples</button>
+                        <button class="category-btn px-3 py-1 bg-gray-200 rounded-full text-sm" data-category="Dairy">Dairy</button>
+                        <button class="category-btn px-3 py-1 bg-gray-200 rounded-full text-sm" data-category="Snacks">Snacks</button>
+                        <button class="category-btn px-3 py-1 bg-gray-200 rounded-full text-sm" data-category="Beverages">Beverages</button>
+                        <button class="category-btn px-3 py-1 bg-gray-200 rounded-full text-sm" data-category="Spices">Spices</button>
+                        <button class="category-btn px-3 py-1 bg-gray-200 rounded-full text-sm" data-category="Sweets">Sweets</button>
+                        <button class="category-btn px-3 py-1 bg-gray-200 rounded-full text-sm" data-category="Others">Others</button>
+                    </div>
+
+                    <h3 class="font-medium mb-2">Popular Products:</h3>
+                    <div id="popular-products" class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                        <!-- Popular products will be populated here -->
+                    </div>
+
+                    <div class="mt-4">
+                        <h3 class="font-medium mb-2">Test with Mock Barcodes:</h3>
+                        <div id="mock-barcodes" class="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                            <!-- Mock barcodes will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Product Info -->
+            <div id="product-info" class="product-card p-6 rounded-xl hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 id="product-name" class="text-xl font-semibold text-primary"></h2>
+                    <div class="text-right">
+                        <div class="rating-bar h-2 w-24 rounded-full mb-2"></div>
+                        <span id="health-rating-text" class="text-sm font-medium"></span>
+                    </div>
+                </div>
+
+                <img id="product-image" src="https://via.placeholder.com/150" alt="Product" class="mx-auto mb-4 rounded-lg">
+                
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-medium">Ingredients:</h3>
+                        <p id="product-ingredients" class="text-sm"></p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-medium">Insights:</h3>
+                        <ul id="product-insights" class="list-disc list-inside text-sm"></ul>
+                    </div>
+
+                    <div>
+                        <h3 class="font-medium">Suggested Alternatives:</h3>
+                        <div id="alternatives" class="grid grid-cols-3 gap-2">
+                            <img src="https://via.placeholder.com/60" alt="Alternative 1" class="rounded">
+                            <img src="https://via.placeholder.com/60" alt="Alternative 2" class="rounded">
+                            <img src="https://via.placeholder.com/60" alt="Alternative 3" class="rounded">
+                        </div>
+                    </div>
+
+                    <button id="buy-button" class="button-primary text-white px-4 py-2 rounded-lg w-full">Buy on Amazon</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Expanded product database with 100+ Indian products
+        const productDatabase = {
+            // Staples
+            "8906012630013": { name: "ITC Aashirvaad Atta", category: "Staples", barcode: "8906012630013", image: "https://via.placeholder.com/150", ingredients: "Whole wheat flour", insights: ["High Fiber", "343 kcal per 100g"], healthRating: "A", alternatives: ["Bansi Atta", "Ragi Flour", "Jowar Flour"] },
+            "8901023000123": { name: "Basmati Rice (India Gate)", category: "Staples", barcode: "8901023000123", image: "https://via.placeholder.com/150", ingredients: "Basmati rice", insights: ["Low Fat", "365 kcal per 100g"], healthRating: "B", alternatives: ["Brown Rice", "Red Rice", "Quinoa"] },
+            "8901045000134": { name: "Toor Dal (Tata Sampann)", category: "Staples", barcode: "8901045000134", image: "https://via.placeholder.com/150", ingredients: "Toor dal", insights: ["High Protein", "345 kcal per 100g"], healthRating: "A", alternatives: ["Moong Dal", "Masoor Dal", "Chana Dal"] },
+            "8901056000145": { name: "Moong Dal (Bansi)", category: "Staples", barcode: "8901056000145", image: "https://via.placeholder.com/150", ingredients: "Moong dal", insights: ["High Protein", "347 kcal per 100g"], healthRating: "A", alternatives: ["Toor Dal", "Masoor Dal", "Urad Dal"] },
+            "8901067000156": { name: "Chana Dal (Organic Tattva)", category: "Staples", barcode: "8901067000156", image: "https://via.placeholder.com/150", ingredients: "Chana dal", insights: ["High Fiber", "364 kcal per 100g"], healthRating: "A", alternatives: ["Moong Dal", "Toor Dal", "Masoor Dal"] },
+
+            // Dairy
+            "8901725132828": { name: "Amul Butter", category: "Dairy", barcode: "8901725132828", image: "https://via.placeholder.com/150", ingredients: "Milk fat, salt, water", insights: ["High Fat", "722 kcal per 100g"], healthRating: "C", alternatives: ["Ghee", "Olive Oil", "Avocado"] },
+            "8901262000167": { name: "Amul Milk (Toned)", category: "Dairy", barcode: "8901262000167", image: "https://via.placeholder.com/150", ingredients: "Toned milk, vitamin A, vitamin D", insights: ["Low Fat", "58 kcal per 100ml"], healthRating: "B", alternatives: ["Soy Milk", "Almond Milk", "Full Cream Milk"] },
+            "8901262000178": { name: "Amul Dahi (Curd)", category: "Dairy", barcode: "8901262000178", image: "https://via.placeholder.com/150", ingredients: "Milk solids, live cultures", insights: ["Probiotic", "60 kcal per 100g"], healthRating: "A", alternatives: ["Greek Yogurt", "Homemade Curd", "Plant-Based Yogurt"] },
+            "8906062000189": { name: "Mother Dairy Paneer", category: "Dairy", barcode: "8906062000189", image: "https://via.placeholder.com/150", ingredients: "Milk solids, citric acid", insights: ["High Protein", "265 kcal per 100g"], healthRating: "B", alternatives: ["Tofu", "Low-Fat Paneer", "Cottage Cheese"] },
+            "8901262000190": { name: "Amul Cheese Slices", category: "Dairy", barcode: "8901262000190", image: "https://via.placeholder.com/150", ingredients: "Cheese, emulsifiers, salt", insights: ["High Sodium", "304 kcal per 100g"], healthRating: "C", alternatives: ["Low-Fat Cheese", "Cottage Cheese", "Homemade Cheese"] },
+
+            // Snacks
+            "8901277004057": { name: "Britannia Good Day Cookies", category: "Snacks", barcode: "8901277004057", image: "https://via.placeholder.com/150", ingredients: "Wheat flour, sugar, palm oil, milk solids, butter, raising agents", insights: ["High Sugar", "502 kcal per 100g"], healthRating: "E", alternatives: ["Oatmeal Cookies", "Almond Biscuits", "Ragi Cookies"] },
+            "8901052000312": { name: "Parle-G Biscuits", category: "Snacks", barcode: "8901052000312", image: "https://via.placeholder.com/150", ingredients: "Wheat flour, sugar, palm oil, invert syrup, leavening agents, salt", insights: ["Moderate Sugar", "450 kcal per 100g"], healthRating: "D", alternatives: ["Marie Biscuits", "Ragi Biscuits", "Whole Wheat Crackers"] },
+            "8901719101213": { name: "Haldiram's Bhujia", category: "Snacks", barcode: "8901719101213", image: "https://via.placeholder.com/150", ingredients: "Gram flour, moth flour, edible oil, salt, spices", insights: ["High Sodium", "540 kcal per 100g"], healthRating: "C", alternatives: ["Baked Sev", "Roasted Nuts", "Puffed Rice Snacks"] },
+            "8901043001314": { name: "Nestlé KitKat", category: "Snacks", barcode: "8901043001314", image: "https://via.placeholder.com/150", ingredients: "Sugar, wheat flour, cocoa butter, milk solids, cocoa powder", insights: ["High Sugar", "518 kcal per 100g"], healthRating: "E", alternatives: ["Dark Chocolate (70%+)", "Homemade Energy Bars", "Fruit Snacks"] },
+            "8901491100221": { name: "Bingo Mad Angles", category: "Snacks", barcode: "8901491100221", image: "https://via.placeholder.com/150", ingredients: "Corn flour, rice flour, edible oil, spices, salt", insights: ["High Sodium", "536 kcal per 100g"], healthRating: "D", alternatives: ["Baked Chips", "Popcorn", "Roasted Makhana"] },
+            "8901491100232": { name: "Lay's Potato Chips (Classic)", category: "Snacks", barcode: "8901491100232", image: "https://via.placeholder.com/150", ingredients: "Potatoes, edible oil, salt", insights: ["High Fat", "536 kcal per 100g"], healthRating: "D", alternatives: ["Baked Chips", "Roasted Chickpeas", "Vegetable Sticks"] },
+            "8901719100243": { name: "Haldiram's Moong Dal Namkeen", category: "Snacks", barcode: "8901719100243", image: "https://via.placeholder.com/150", ingredients: "Moong dal, edible oil, salt, spices", insights: ["High Sodium", "500 kcal per 100g"], healthRating: "C", alternatives: ["Roasted Moong", "Baked Namkeen", "Puffed Rice"] },
+
+            // Beverages
+            "12345678": { name: "Cadbury Bournvita", category: "Beverages", barcode: "12345678", image: "https://via.placeholder.com/150", ingredients: "Malt extract, sugar, cocoa solids, milk solids, caramel, vitamins, minerals", insights: ["High Sugar", "172 kcal per cup"], healthRating: "E", alternatives: ["Horlicks Lite", "Complan", "Boost"] },
+            "8901057000251": { name: "Tata Tea Gold", category: "Beverages", barcode: "8901057000251", image: "https://via.placeholder.com/150", ingredients: "Tea leaves", insights: ["Low Calorie", "0 kcal per cup"], healthRating: "A", alternatives: ["Green Tea", "Herbal Tea", "Organic Tea"] },
+            "8901057000262": { name: "Nescafé Classic Coffee", category: "Beverages", barcode: "8901057000262", image: "https://via.placeholder.com/150", ingredients: "Coffee powder", insights: ["Low Calorie", "2 kcal per cup"], healthRating: "A", alternatives: ["Filter Coffee", "Black Coffee", "Herbal Coffee"] },
+            "8901057000273": { name: "Real Juice (Orange)", category: "Beverages", barcode: "8901057000273", image: "https://via.placeholder.com/150", ingredients: "Water, orange juice concentrate, sugar, citric acid", insights: ["High Sugar", "48 kcal per 100ml"], healthRating: "D", alternatives: ["Fresh Orange Juice", "Coconut Water", "Watermelon Juice"] },
+            "8901057000284": { name: "Frooti Mango Drink", category: "Beverages", barcode: "8901057000284", image: "https://via.placeholder.com/150", ingredients: "Water, mango pulp, sugar, citric acid", insights: ["High Sugar", "65 kcal per 100ml"], healthRating: "D", alternatives: ["Fresh Mango Juice", "Coconut Water", "Homemade Lassi"] },
+            "8901057000295": { name: "Amul Kool (Mango)", category: "Beverages", barcode: "8901057000295", image: "https://via.placeholder.com/150", ingredients: "Milk, sugar, mango pulp, stabilizers", insights: ["Moderate Sugar", "90 kcal per 100ml"], healthRating: "C", alternatives: ["Plain Lassi", "Fresh Juice", "Coconut Water"] },
+
+            // Spices and Condiments
+            "8901063152389": { name: "MTR Sambar Powder", category: "Spices", barcode: "8901063152389", image: "https://via.placeholder.com/150", ingredients: "Coriander, red chillies, turmeric, fenugreek, Bengal gram, black gram", insights: ["Low Sodium", "306 kcal per 100g"], healthRating: "A", alternatives: ["Homemade Sambar Powder", "Everest Sambar Masala", "Shan Seasoning"] },
+            "8901012100301": { name: "Everest Garam Masala", category: "Spices", barcode: "8901012100301", image: "https://via.placeholder.com/150", ingredients: "Coriander, cumin, black pepper, cinnamon, cloves", insights: ["Low Sodium", "310 kcal per 100g"], healthRating: "A", alternatives: ["Homemade Garam Masala", "MDH Garam Masala", "Biryani Masala"] },
+            "8901012100312": { name: "MDH Chaat Masala", category: "Spices", barcode: "8901012100312", image: "https://via.placeholder.com/150", ingredients: "Salt, black salt, cumin, coriander, dried mango powder", insights: ["High Sodium", "240 kcal per 100g"], healthRating: "C", alternatives: ["Homemade Chaat Masala", "Low-Sodium Mix", "Spice Blend"] },
+            "8901030657740": { name: "Tata Salt", category: "Spices", barcode: "8901030657740", image: "https://via.placeholder.com/150", ingredients: "Sodium chloride, potassium iodate, anti-caking agent", insights: ["Iodized", "0 kcal"], healthRating: "B", alternatives: ["Himalayan Pink Salt", "Sea Salt", "Low-Sodium Salt"] },
+            "8901012100323": { name: "Kissan Tomato Ketchup", category: "Spices", barcode: "8901012100323", image: "https://via.placeholder.com/150", ingredients: "Tomato paste, sugar, vinegar, salt, spices", insights: ["High Sugar", "112 kcal per 100g"], healthRating: "D", alternatives: ["Homemade Ketchup", "Salsa", "Low-Sugar Ketchup"] },
+
+            // Sweets
+            "8901012111305": { name: "Bikanervala Rasgulla", category: "Sweets", barcode: "8901012111305", image: "https://via.placeholder.com/150
