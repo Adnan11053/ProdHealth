@@ -9,10 +9,5 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-
-  experimental: {
-    runtime: "nodejs",
-  },
-};
-
+}
 export default nextConfig;
