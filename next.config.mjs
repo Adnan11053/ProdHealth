@@ -10,10 +10,9 @@ const nextConfig = {
     unoptimized: true,
   },
 
-  // 🔥 ADD THIS PART TO FORCE NODE RUNTIME
   experimental: {
     runtime: "nodejs",
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
