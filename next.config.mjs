@@ -9,6 +9,11 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-}
 
-export default nextConfig
+  // 🔥 ADD THIS PART TO FORCE NODE RUNTIME
+  experimental: {
+    runtime: "nodejs",
+  },
+};
+
+module.exports = nextConfig;
